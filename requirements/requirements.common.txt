@@ -168,7 +168,7 @@ pulpcore==3.11.0.post0
     #   galaxy-ng (setup.py)
     #   pulp-ansible
     #   pulp-container
-pycares==3.1.1
+pycares==4.2.0
     # via aiodns
 pycodestyle==2.7.0
     # via flake8
