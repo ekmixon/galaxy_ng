@@ -51,7 +51,7 @@ class TestUiCollectionVersionViewSet(BaseTestCase):
             self.namespace, self.collection, '1.1.2', _create_repo(name='repo2'))
 
     def _versions_url_with_params(self, query_params):
-        return self.versions_url + '?' + urllib.parse.urlencode(query_params)
+        return f'{self.versions_url}?{urllib.parse.urlencode(query_params)}'
 
     def test_no_filters(self):
         response = self.client.get(self.versions_url)

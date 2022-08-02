@@ -32,18 +32,17 @@ class LastSyncTaskMixin:
         raise NotImplementedError("subclass must implement get_last_sync_task_queryset")
 
     def get_last_sync_task(self, obj):
-        sync_task = self.get_last_sync_task_queryset(obj)
-        if not sync_task:
+        if sync_task := self.get_last_sync_task_queryset(obj):
+            return {
+                "task_id": sync_task.id,
+                "state": sync_task.task.state,
+                "started_at": sync_task.task.started_at,
+                "finished_at": sync_task.task.finished_at,
+                "error": sync_task.task.error
+            }
+        else:
             # UI handles `null` as "no status"
             return
-
-        return {
-            "task_id": sync_task.id,
-            "state": sync_task.task.state,
-            "started_at": sync_task.task.started_at,
-            "finished_at": sync_task.task.finished_at,
-            "error": sync_task.task.error
-        }
 
 
 class AnsibleRepositorySerializer(LastSyncTaskMixin, serializers.ModelSerializer):
@@ -151,7 +150,7 @@ class CollectionRemoteSerializer(LastSyncTaskMixin, pulp_viewsets.CollectionRemo
 
     def validate(self, data):
         if not data.get('requirements_file') and any(
-            [domain in data['url'] for domain in COMMUNITY_DOMAINS]
+            domain in data['url'] for domain in COMMUNITY_DOMAINS
         ):
             raise serializers.ValidationError(
                 detail={

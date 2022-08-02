@@ -23,6 +23,4 @@ def user_x_rh_identity(username, account_number=None):
             }""" % {'username': username, 'title_username': title_username,
                     'account_number': account_number}
 
-    token_b64 = base64.b64encode(token_json.encode())
-
-    return token_b64
+    return base64.b64encode(token_json.encode())

@@ -26,16 +26,16 @@ class Command(BaseCommand):
         for group_name in options['groups']:
             group, created = Group.objects.get_or_create(name=group_name)
             if created:
-                self.stdout.write("Created group '{}'".format(group_name))
+                self.stdout.write(f"Created group '{group_name}'")
             else:
-                self.stdout.write("Group '{}' already exists".format(group_name))
+                self.stdout.write(f"Group '{group_name}' already exists")
 
             for username in options['users']:
                 try:
                     user = User.objects.get(username=username)
                 except User.DoesNotExist:
-                    self.stdout.write("User '{}' not found. Skipping.".format(username))
+                    self.stdout.write(f"User '{username}' not found. Skipping.")
                     continue
                 user.groups.add(group)
                 user.save()
-                self.stdout.write("Assigned group '{}' to user '{}'".format(group_name, username))
+                self.stdout.write(f"Assigned group '{group_name}' to user '{username}'")

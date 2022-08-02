@@ -24,26 +24,25 @@ class Command(BaseCommand):
             return Group.objects.get(name=group)
         except ObjectDoesNotExist:
             raise CommandError(
-                'Group {} does not exist. Please provide a valid '
-                'group name.'.format(group))
+                f'Group {group} does not exist. Please provide a valid group name.'
+            )
 
     def valid_permission(self, permission):
         try:
             app_label, codename = permission.split('.', 1)
         except ValueError:
             raise CommandError(
-                "Invalid permission format for {}. "
-                "Expecting 'app_label.codename'.".format(permission)
+                f"Invalid permission format for {permission}. Expecting 'app_label.codename'."
             )
+
         try:
             return Permission.objects.get(
                 content_type__app_label=app_label,
                 codename=codename)
         except ObjectDoesNotExist:
             raise CommandError(
-                "Permission {} not found. Please provide a valid "
-                "permission in the form 'app_label.codename'".format(
-                    permission))
+                f"Permission {permission} not found. Please provide a valid permission in the form 'app_label.codename'"
+            )
 
     def add_arguments(self, parser):
         parser.add_argument('group', type=self.valid_group)
@@ -57,5 +56,4 @@ class Command(BaseCommand):
         group = options['group']
         for perm in options['permissions']:
             group.permissions.add(perm.id)
-        self.stdout.write("Assigned requested permission to "
-                          "group '{}'".format(group.name))
+        self.stdout.write(f"Assigned requested permission to group '{group.name}'")

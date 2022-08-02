@@ -81,10 +81,7 @@ class AccessPolicyVerboseMixin:
 
         denied = [_ for _ in matched if _["effect"] != "allow"]
 
-        if len(matched) == 0 or len(denied) > 0:
-            return False
-
-        return True
+        return len(matched) != 0 and not denied
 
     def _check_condition(self, condition: str, request, view, action: str):
         """
@@ -111,10 +108,7 @@ class AccessPolicyVerboseMixin:
                 % (condition, type(result))
             )
 
-        res_blurb = "failed"
-        if result:
-            res_blurb = "passed"
-
+        res_blurb = "passed" if result else "failed"
         log.debug('"%s" action "%s" for user "%s" %s conditions "%s"',
                   self.NAME,
                   action,
@@ -178,10 +172,7 @@ class AccessPolicyBase(AccessPolicyVerboseMixin, AccessPolicy):
             return False
 
         x_rh_identity = request.auth.get('rh_identity')
-        if not x_rh_identity:
-            return False
-
-        return x_rh_identity
+        return x_rh_identity or False
 
     # used by insights access policy
     def has_rh_entitlements(self, request, view, permission):

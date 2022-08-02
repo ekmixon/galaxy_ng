@@ -51,8 +51,7 @@ class TestUIDistributions(BaseTestCase):
             repository=repo, name=repo.name, base_path=repo.name)
 
     def _create_repository(self, name):
-        repo = pulp_ansible_models.AnsibleRepository.objects.create(name=name)
-        return repo
+        return pulp_ansible_models.AnsibleRepository.objects.create(name=name)
 
     def _create_synclist(
         self, name, repository, upstream_repository, collections=None, namespaces=None,
@@ -61,9 +60,7 @@ class TestUIDistributions(BaseTestCase):
         synclist = galaxy_models.SyncList.objects.create(
             name=name, repository=repository, upstream_repository=upstream_repository)
         if groups:
-            groups_to_add = {}
-            for group in groups:
-                groups_to_add[group] = self.default_owner_permissions
+            groups_to_add = {group: self.default_owner_permissions for group in groups}
             synclist.groups = groups_to_add
         return synclist
 

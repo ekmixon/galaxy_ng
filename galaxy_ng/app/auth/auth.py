@@ -84,10 +84,13 @@ class RHIdentityAuthentication(BaseAuthentication):
             # check for existing synclists
             perms = ['galaxy.view_synclist']
 
-            synclists_owned_by_group = \
-                shortcuts.get_objects_for_group(group, perms, klass=SyncList,
-                                                any_perm=False, accept_global_perms=True)
-            if synclists_owned_by_group:
+            if synclists_owned_by_group := shortcuts.get_objects_for_group(
+                group,
+                perms,
+                klass=SyncList,
+                any_perm=False,
+                accept_global_perms=True,
+            ):
                 return synclists_owned_by_group
 
             upstream_repository = self._get_upstream_repo(group, DEFAULT_UPSTREAM_REPO_NAME)

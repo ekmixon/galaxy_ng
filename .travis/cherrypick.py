@@ -19,7 +19,7 @@ def blobs_match(commit1, commit2):
 
     for cf in commit1.files:
         files = [f for f in commit2.files if f.sha == cf.sha and f.filename == cf.filename]
-        if len(files) == 0:
+        if not files:
             return False
 
     return True
@@ -96,7 +96,7 @@ for issue in issues:
             print(f"Cherry-picked commit {commit.sha}.")
 
 # check if we cherry picked anything
-if len(cherrypicks) == 0:
+if not cherrypicks:
     print("No cherry picks detected.")
     exit(0)
 

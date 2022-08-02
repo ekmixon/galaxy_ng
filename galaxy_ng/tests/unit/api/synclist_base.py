@@ -80,15 +80,8 @@ class BaseSyncListViewSet(base.BaseTestCase):
         upstream_repository=None,
     ):
         upstream_repository = upstream_repository or self.default_repo
-        if isinstance(groups, auth_models.Group):
-            groups = [groups]
-        else:
-            groups = groups or []
-
-        groups_to_add = {}
-        for group in groups:
-            groups_to_add[group] = self.default_owner_permissions
-
+        groups = [groups] if isinstance(groups, auth_models.Group) else groups or []
+        groups_to_add = {group: self.default_owner_permissions for group in groups}
         synclist, _ = galaxy_models.SyncList.objects.get_or_create(
             name=name, repository=repository, upstream_repository=upstream_repository,
         )

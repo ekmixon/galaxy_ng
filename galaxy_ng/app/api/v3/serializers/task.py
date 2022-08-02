@@ -34,8 +34,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(Optional[str])
     def get_repository(self, obj):
-        sync_task = CollectionSyncTask.objects.filter(task=obj).first()
-        if sync_task:
+        if sync_task := CollectionSyncTask.objects.filter(task=obj).first():
             return sync_task.repository.name
 
     class Meta:

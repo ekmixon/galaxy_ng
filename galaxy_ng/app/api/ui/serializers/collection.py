@@ -87,11 +87,11 @@ class CollectionVersionSerializer(CollectionVersionBaseSerializer):
             name__startswith='inbound-').exclude(name__endswith='-synclist')
 
         qs = CollectionVersion.objects.filter(pk=collection_version.pk)
-        cv_in_repo_latest_version = []
-        for repo in all_repos:
-            if qs.filter(pk__in=repo.latest_version().content):
-                cv_in_repo_latest_version.append(repo.name)
-        return cv_in_repo_latest_version
+        return [
+            repo.name
+            for repo in all_repos
+            if qs.filter(pk__in=repo.latest_version().content)
+        ]
 
 
 class CollectionVersionDetailSerializer(CollectionVersionBaseSerializer):

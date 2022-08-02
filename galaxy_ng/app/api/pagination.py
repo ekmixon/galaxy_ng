@@ -17,7 +17,7 @@ class LimitOffsetPagination(pagination.LimitOffsetPagination):
         url = self.request.get_full_path()
         url = replace_query_param(url, self.limit_query_param, self.limit)
 
-        offset = self.count - self.limit if (self.count - self.limit) >= 0 else 0
+        offset = max(self.count - self.limit, 0)
         return replace_query_param(url, self.offset_query_param, offset)
 
     def get_next_link(self):

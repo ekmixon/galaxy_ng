@@ -36,18 +36,17 @@ class GroupPermissionField(serializers.Field):
             # TODO(newswangerd): Figure out how to make this one SQL query instead of
             # performing N queries for each permission
             if not Permission.objects.filter(filter_q).exists():
-                raise ValidationError(detail={
-                    'groups': 'Permission {} does not exist'.format(perm)})
+                raise ValidationError(detail={'groups': f'Permission {perm} does not exist'})
 
     def to_representation(self, value):
-        rep = []
-        for group in value:
-            rep.append({
+        return [
+            {
                 'id': group.id,
                 'name': group.name,
-                'object_permissions': value[group]
-            })
-        return rep
+                'object_permissions': value[group],
+            }
+            for group in value
+        ]
 
     def to_internal_value(self, data):
         if not isinstance(data, list):
@@ -58,17 +57,22 @@ class GroupPermissionField(serializers.Field):
         internal = {}
         for group_data in data:
             self._validate_group(group_data)
-            group_filter = {}
-            for field in group_data:
-                if field in ('id', 'name'):
-                    group_filter[field] = group_data[field]
+            group_filter = {
+                field: group_data[field]
+                for field in group_data
+                if field in ('id', 'name')
+            }
+
             try:
                 group = auth_models.Group.objects.get(**group_filter)
                 internal[group] = group_data['object_permissions']
             except auth_models.Group.DoesNotExist:
-                raise ValidationError(detail={
-                    'groups': "Group name=%s, id=%s does not exist" % (group_data.get('name'),
-                                                                       group_data.get('id'))})
+                raise ValidationError(
+                    detail={
+                        'groups': f"Group name={group_data.get('name')}, id={group_data.get('id')} does not exist"
+                    }
+                )
+
             except ValueError:
                 raise ValidationError(detail={'group': 'Invalid group name or ID'})
 
@@ -83,7 +87,7 @@ class MyPermissionsField(serializers.Serializer):
         # not all permissions a user has.
         my_perms = []
         for perm in get_perms_for_model(type(obj)).all():
-            codename = "{}.{}".format(perm.content_type.app_label, perm.codename)
+            codename = f"{perm.content_type.app_label}.{perm.codename}"
             if user.has_perm(codename) or user.has_perm(codename, obj):
                 my_perms.append(codename)
 

@@ -25,15 +25,11 @@ class ScopedErrorListSerializer(serializers.ListSerializer):
 
         try:
             return super().run_validation(*args, **kwargs)
-        except (ValidationError) as exc:
+        except ValidationError as exc:
             new_detail = []
             # loop through list of errors
             for err in exc.detail:
-                new_err = {}
-                # loop for fields in error
-                for field in err:
-                    new_err["{}__{}".format(scoped_err_name, field)] = err[field]
-
+                new_err = {f"{scoped_err_name}__{field}": err[field] for field in err}
                 new_detail.append(new_err)
 
             exc.detail = new_detail

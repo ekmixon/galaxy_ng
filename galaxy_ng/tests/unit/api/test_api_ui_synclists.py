@@ -45,12 +45,11 @@ class BaseUiSynclistViewSet:
 
     def _group(self, user_group, perms=None):
         perms = perms or self.default_owner_permissions
-        group = {
+        return {
             "id": user_group.id,
             "name": user_group.name,
             "object_permissions": perms,
         }
-        return group
 
     def test_synclist_create(self):
         new_synclist_name = "new_synclist"

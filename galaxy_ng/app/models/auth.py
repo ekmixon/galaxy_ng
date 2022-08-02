@@ -45,8 +45,7 @@ class Group(auth_models.Group):
     def account_number(self):
         scope = "rh-identity-account"
         if self.name.startswith(scope):
-            account = self.name.replace(f"{scope}:", "", 1)
-            return account
+            return self.name.replace(f"{scope}:", "", 1)
 
         # If not a rh-identity-scoped return full group name
         return self.name

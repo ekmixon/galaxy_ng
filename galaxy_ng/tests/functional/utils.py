@@ -101,8 +101,8 @@ def populate_pulp(cfg, url=GALAXY_FIXTURE_URL):
     remote = {}
     repo = {}
     try:
-        remote.update(client.post(GALAXY_REMOTE_PATH, gen_galaxy_remote(url)))
-        repo.update(client.post(GALAXY_REPO_PATH, gen_repo()))
+        remote |= client.post(GALAXY_REMOTE_PATH, gen_galaxy_remote(url))
+        repo |= client.post(GALAXY_REPO_PATH, gen_repo())
         sync(cfg, remote, repo)
     finally:
         if remote:
@@ -171,7 +171,4 @@ def monitor_task(task_href):
         sleep(2)
         task = tasks.read(task_href)
 
-    if task.state == "completed":
-        return task.created_resources
-
-    return task.to_dict()
+    return task.created_resources if task.state == "completed" else task.to_dict()

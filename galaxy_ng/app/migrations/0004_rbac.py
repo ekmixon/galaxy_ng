@@ -20,8 +20,9 @@ def assign_perm(apps, perm, owner, obj=None):
         'permission': perm,
         'content_type': perm.content_type,
         'object_pk': obj.pk,
+        'group': owner,
     }
-    kwargs['group'] = owner
+
     return GroupObjectPermission.objects.get_or_create(**kwargs)
 
 

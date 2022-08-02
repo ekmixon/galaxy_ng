@@ -40,7 +40,7 @@ class Command(BaseCommand):
         try:
             parse_collections_requirements_file(requirements_file)
         except ValidationError as e:
-            raise CommandError("Error parsing requirements_file {}".format(str(e)))
+            raise CommandError(f"Error parsing requirements_file {str(e)}")
         else:
             self.status_messages.append("requirements_file loaded and parsed")
 
@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
     def validate(self, data):
         if not data["requirements_file"] and any(
-            [domain in data["url"] for domain in COMMUNITY_DOMAINS]
+            domain in data["url"] for domain in COMMUNITY_DOMAINS
         ):
             raise CommandError(
                 'Syncing content from community domains without specifying a '
@@ -99,11 +99,9 @@ class Command(BaseCommand):
                 setattr(remote, arg, data[arg])
         remote.save()
         self.status_messages.append(
-            "{} CollectionRemote {}".format(
-                "Created new" if remote_created else "Updated existing",
-                remote.name
-            )
+            f'{"Created new" if remote_created else "Updated existing"} CollectionRemote {remote.name}'
         )
+
 
         return remote
 
@@ -115,11 +113,9 @@ class Command(BaseCommand):
         repository.remote = remote
         repository.save()
         self.status_messages.append(
-            "{} Repository {}".format(
-                "Created new" if repo_created else "Associated existing",
-                repository.name,
-            )
+            f'{"Created new" if repo_created else "Associated existing"} Repository {repository.name}'
         )
+
         return repository
 
     def create_distribution(self, data, remote, repository):
@@ -133,11 +129,9 @@ class Command(BaseCommand):
         distribution.remote = remote
         distribution.save()
         self.status_messages.append(
-            "{} Distribution {}".format(
-                "Created new" if distro_created else "Associated existing",
-                distribution.name,
-            )
+            f'{"Created new" if distro_created else "Associated existing"} Distribution {distribution.name}'
         )
+
         return distribution
 
     def handle(self, *args, **data):

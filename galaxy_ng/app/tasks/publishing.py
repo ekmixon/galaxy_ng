@@ -20,14 +20,10 @@ def get_created_collection_versions():
     created_resources = current_task.created_resources.filter(
         content_type_id=ContentType.objects.get_for_model(CollectionVersion))
 
-    # TODO: replace with values_list
-    created_collection_versions = []
-    for created_resource in created_resources:
-        collection_version = created_resource.content_object
-
-        created_collection_versions.append(collection_version)
-
-    return created_collection_versions
+    return [
+        created_resource.content_object
+        for created_resource in created_resources
+    ]
 
 
 def import_and_move_to_staging(temp_file_pk, **kwargs):

@@ -36,19 +36,16 @@ class SyncListSerializer(serializers.ModelSerializer):
 
     def _get_repository(self, repository_id):
         try:
-            repository = AnsibleRepository.objects.get(pulp_id=repository_id)
-            return repository
+            return AnsibleRepository.objects.get(pulp_id=repository_id)
         except AnsibleRepository.DoesNotExist:
             errmsg = 'Repository "{pulp_id}" not found while creating synclist'
             raise ValidationError(errmsg.format(pulp_id=repository_id))
 
     def to_internal_value(self, data):
-        repository_data = data.get("repository", None)
-        if repository_data:
+        if repository_data := data.get("repository", None):
             data["repository"] = self._get_repository(repository_data)
 
-        upstream_repository_data = data.get("upstream_repository", None)
-        if upstream_repository_data:
+        if upstream_repository_data := data.get("upstream_repository", None):
             data["upstream_repository"] = self._get_repository(upstream_repository_data)
         else:
             # If not specified, use the default upstream repo
@@ -94,7 +91,7 @@ class SyncListSerializer(serializers.ModelSerializer):
                 **validated_data
             )
         except IntegrityError as exc:
-            raise ValidationError("Synclist already exists: %s" % exc)
+            raise ValidationError(f"Synclist already exists: {exc}")
 
         collections = []
         for collection_data in collections_data:
@@ -122,8 +119,7 @@ class SyncListSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         collections_data = validated_data.get("collections", [])
 
-        groups_data = validated_data.get("groups")
-        if groups_data:
+        if groups_data := validated_data.get("groups"):
             instance.groups = groups_data
 
         namespaces_data = validated_data.get("namespaces")

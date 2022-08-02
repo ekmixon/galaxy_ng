@@ -20,7 +20,7 @@ message = subprocess.check_output(["git", "log", "--format=%B", "-n 1", sha]).de
 
 
 def __check_status(issue):
-    response = requests.get("https://pulp.plan.io/issues/{}.json".format(issue))
+    response = requests.get(f"https://pulp.plan.io/issues/{issue}.json")
     response.raise_for_status()
     bug_json = response.json()
     status = bug_json["issue"]["status"]["name"]
@@ -36,25 +36,33 @@ def __check_changelog(issue):
         sys.exit(f"Could not find changelog entry in CHANGES/ for {issue}.")
 
 
-print("Checking commit message for {sha}.".format(sha=sha[0:7]))
+print("Checking commit message for {sha}.".format(sha=sha[:7]))
 
 # validate the issue attached to the commit
 if NO_ISSUE in message:
-    print("Commit {sha} has no issue attached. Skipping issue check".format(sha=sha[0:7]))
+    print(
+        "Commit {sha} has no issue attached. Skipping issue check".format(
+            sha=sha[:7]
+        )
+    )
+
 else:
     regex = r"(?:{keywords})[\s:]+#(\d+)".format(keywords=("|").join(KEYWORDS))
     pattern = re.compile(regex)
 
-    issues = pattern.findall(message)
-
-    if issues:
+    if issues := pattern.findall(message):
         for issue in pattern.findall(message):
             __check_status(issue)
             __check_changelog(issue)
     else:
         sys.exit(
-            "Error: no attached issues found for {sha}. If this was intentional, add "
-            " '{tag}' to the commit message.".format(sha=sha[0:7], tag=NO_ISSUE)
+            (
+                "Error: no attached issues found for {sha}. If this was intentional, add "
+                " '{tag}' to the commit message.".format(
+                    sha=sha[:7], tag=NO_ISSUE
+                )
+            )
         )
 
-print("Commit message for {sha} passed.".format(sha=sha[0:7]))
+
+print("Commit message for {sha} passed.".format(sha=sha[:7]))

@@ -56,9 +56,11 @@ class BaseTestCase(APITestCase):
         if isinstance(groups, auth_models.Group):
             groups = [groups]
 
-        groups_to_add = {}
-        for group in groups:
-            groups_to_add[group] = ['galaxy.upload_to_namespace', 'galaxy.change_namespace']
+        groups_to_add = {
+            group: ['galaxy.upload_to_namespace', 'galaxy.change_namespace']
+            for group in groups
+        }
+
         namespace.groups = groups_to_add
         return namespace
 

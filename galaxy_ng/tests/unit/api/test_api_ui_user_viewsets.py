@@ -61,7 +61,7 @@ class TestUiUserViewSet(BaseTestCase):
             response = self.client.put(self.me_url, my_data, format='json')
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-            put_url = '{}{}/'.format(self.user_url, user.id)
+            put_url = f'{self.user_url}{user.id}/'
             response = self.client.put(put_url, my_data, format='json')
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -150,7 +150,7 @@ class TestUiUserViewSet(BaseTestCase):
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_get(self):
-        url = '{}{}/'.format(self.user_url, self.user.id)
+        url = f'{self.user_url}{self.user.id}/'
 
         # Users cannot view themselves on the users/ api
         self.client.force_authenticate(user=self.user)
@@ -159,12 +159,12 @@ class TestUiUserViewSet(BaseTestCase):
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # But not other users
-        url = '{}{}/'.format(self.user_url, self.admin_user.id)
+        url = f'{self.user_url}{self.admin_user.id}/'
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(url)
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        url = '{}{}/'.format(self.user_url, self.user.id)
+        url = f'{self.user_url}{self.user.id}/'
         self.client.force_authenticate(user=self.admin_user)
         with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
             response = self.client.get(url)
@@ -196,8 +196,12 @@ class TestUiUserViewSet(BaseTestCase):
             for err in response.data['errors']:
                 error_messages.add(err['code'])
 
-            desired_errors = set(
-                ['password_too_short', 'password_too_common', 'password_entirely_numeric'])
+            desired_errors = {
+                'password_too_short',
+                'password_too_common',
+                'password_entirely_numeric',
+            }
+
 
             self.assertEqual(error_messages, desired_errors)
 
@@ -243,7 +247,7 @@ class TestUiUserViewSet(BaseTestCase):
 
     def test_user_update(self):
         user = auth_models.User.objects.create(username='test2')
-        put_url = '{}{}/'.format(self.user_url, user.id)
+        put_url = f'{self.user_url}{user.id}/'
         user.groups.add(self.pe_group)
         user.save()
         new_user_data = {
@@ -302,7 +306,7 @@ class TestUiUserViewSet(BaseTestCase):
             }]
         }
 
-        url = '{}{}/'.format(self.user_url, user.id)
+        url = f'{self.user_url}{user.id}/'
 
         response = self.client.put(url, new_user_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -336,7 +340,7 @@ class TestUiUserViewSet(BaseTestCase):
         self._test_create_or_update(
             self.client.put, self.me_url, new_user_data, status.HTTP_200_OK, user)
 
-        url = '{}{}/'.format(self.user_url, user.id)
+        url = f'{self.user_url}{user.id}/'
 
         client = APIClient(raise_request_exception=True)
         client.force_authenticate(user=user)
@@ -384,7 +388,7 @@ class TestUiUserViewSet(BaseTestCase):
             self.client.put, self.me_url, new_user_data, status.HTTP_200_OK, user)
 
         # try to delete a user that is_super_user
-        url = '{}{}/'.format(self.user_url, superuser.id)
+        url = f'{self.user_url}{superuser.id}/'
 
         client = APIClient(raise_request_exception=True)
         client.force_authenticate(user=user)
@@ -396,7 +400,7 @@ class TestUiUserViewSet(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # Try to delete 'admin' user
-        url = '{}{}/'.format(self.user_url, self.admin_user.id)
+        url = f'{self.user_url}{self.admin_user.id}/'
         response = client.delete(url, format='json')
 
         log.debug('response: %s', response)

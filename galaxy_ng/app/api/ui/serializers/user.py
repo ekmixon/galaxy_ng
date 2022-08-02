@@ -63,19 +63,15 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_is_superuser(self, data):
         request_user = self.context['request'].user
-        if request_user.is_superuser != data:
-            if not request_user.is_superuser:
-                raise ValidationError(detail={
-                    "is_superuser": "Must be a super user to grant super user permissions."
-                })
+        if request_user.is_superuser != data and not request_user.is_superuser:
+            raise ValidationError(detail={
+                "is_superuser": "Must be a super user to grant super user permissions."
+            })
 
         return data
 
     def _set_password(self, instance, data):
-        # password doesn't get set the same as other data, so delete it
-        # before the serializer saves
-        password = data.pop('password', None)
-        if password:
+        if password := data.pop('password', None):
             instance.set_password(password)
         return instance
 
@@ -96,21 +92,25 @@ class UserSerializer(serializers.ModelSerializer):
         return representation
 
     def to_internal_value(self, data):
-        groups = data.get('groups')
-        if groups:
+        if groups := data.get('groups'):
             group_ids = []
             for group in groups:
-                group_filter = {}
-                for field in group:
-                    if field in ('id', 'name'):
-                        group_filter[field] = group[field]
+                group_filter = {
+                    field: group[field]
+                    for field in group
+                    if field in ('id', 'name')
+                }
+
                 try:
                     group = auth_models.Group.objects.get(**group_filter)
                     group_ids.append(group.id)
                 except auth_models.Group.DoesNotExist:
-                    raise ValidationError(detail={
-                        'groups': "Group name=%s, id=%s does not exist" % (group.get('name'),
-                                                                           group.get('id'))})
+                    raise ValidationError(
+                        detail={
+                            'groups': f"Group name={group.get('name')}, id={group.get('id')} does not exist"
+                        }
+                    )
+
                 except ValueError:
                     raise ValidationError(detail={'group': 'Invalid group name or ID'})
             data['groups'] = group_ids

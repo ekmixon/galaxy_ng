@@ -111,20 +111,19 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
 
 
 def _get_last_sync_task(repo):
-    sync_task = models.container.ContainerSyncTask.objects.filter(
+    if sync_task := models.container.ContainerSyncTask.objects.filter(
         repository=repo
-    ).first()
-    if not sync_task:
+    ).first():
+        return {
+            "task_id": sync_task.id,
+            "state": sync_task.task.state,
+            "started_at": sync_task.task.started_at,
+            "finished_at": sync_task.task.finished_at,
+            "error": sync_task.task.error
+        }
+    else:
         # UI handles `null` as "no status"
         return
-
-    return {
-        "task_id": sync_task.id,
-        "state": sync_task.task.state,
-        "started_at": sync_task.task.started_at,
-        "finished_at": sync_task.task.finished_at,
-        "error": sync_task.task.error
-    }
 
 
 class ContainerManifestSerializer(serializers.ModelSerializer):
@@ -146,16 +145,10 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
         )
 
     def get_layers(self, obj):
-        layers = []
-        # use the prefetched blob_list and artifact_list instead of obj.blobs and
-        # blob._artifacts to cut down on queries made.
-        for blob in obj.blob_list:
-            layers.append({
-                'digest': blob.digest,
-                'size': blob.artifact_list[0].size
-            })
-
-        return layers
+        return [
+            {'digest': blob.digest, 'size': blob.artifact_list[0].size}
+            for blob in obj.blob_list
+        ]
 
     def get_config_blob(self, obj):
         return {
@@ -164,13 +157,7 @@ class ContainerManifestSerializer(serializers.ModelSerializer):
         }
 
     def get_tags(self, obj):
-        tags = []
-        # tagget_manifests returns all tags on the manifest, not just the ones
-        # that are in the latest version of the repo.
-        for tag in obj.tagged_manifests.all():
-            tags.append(tag.name)
-
-        return tags
+        return [tag.name for tag in obj.tagged_manifests.all()]
 
 
 class ContainerManifestDetailSerializer(ContainerManifestSerializer):

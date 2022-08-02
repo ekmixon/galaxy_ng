@@ -130,13 +130,7 @@ class ContainerRepositoryManifestViewSet(ContainerContentBaseViewset):
             )
         )
 
-        # I know that this should go in the FilterSet, but I cannot for the life
-        # of me figure out how to access base_path in the filterset. Without
-        # base_path, it's impossible to filter the tags down to a specific repo version,
-        # which means this query would end up pulling all of the tags in all repos
-        # that match the tag param, which could potentially be thousands of objects.
-        tag_filter = self.request.GET.get('tag', None)
-        if tag_filter:
+        if tag_filter := self.request.GET.get('tag', None):
             manifests = manifests.filter(
                 # tagged_manifests doesn't respect the Prefetch filtering, so
                 # the repo version has to be filtered again here

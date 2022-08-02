@@ -153,6 +153,6 @@ def curate_synclist_repository(synclist_pk, **kwargs):
             "remove_content_units": ["*"],
         }
     else:
-        raise RuntimeError("Unexpected synclist policy {}".format(synclist.policy))
+        raise RuntimeError(f"Unexpected synclist policy {synclist.policy}")
 
     add_and_remove(**task_kwargs)

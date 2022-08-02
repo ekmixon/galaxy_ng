@@ -41,7 +41,7 @@ class TestTokenViewStandalone(APITestCase):
 
     def test_issue_token_basic_auth(self):
         client = APIClient()
-        http_authorization = "Basic {}".format(base64.b64encode(b"test:test-secret").decode())
+        http_authorization = f'Basic {base64.b64encode(b"test:test-secret").decode()}'
         client.credentials(HTTP_AUTHORIZATION=http_authorization)
         response: Response = client.post(self.token_url)
         self.assertEqual(response.status_code, http_code.HTTP_200_OK)
@@ -62,7 +62,7 @@ class TestTokenViewStandalone(APITestCase):
         token = token_models.Token.objects.create(user=self.user)
 
         new_client = APIClient()
-        new_client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        new_client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
 
         response: Response = new_client.get(self.me_url)
         self.assertEqual(response.status_code, http_code.HTTP_200_OK)
